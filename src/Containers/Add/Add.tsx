@@ -23,10 +23,7 @@ const Add = () => {
   };
 
   return <>
-    {loader ?
-      <Loader/>
-      :
-      <QuoteForm submitForm={submitForm}/>}
+    {loader ? <Loader/> : <QuoteForm submitForm={submitForm}/>}
   </>;
 };
 
