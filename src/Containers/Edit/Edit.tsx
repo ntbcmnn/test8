@@ -55,7 +55,7 @@ const Edit = () => {
         <>
           {quote ? (
             <QuoteForm quoteToEdit={quote} submitForm={submitForm}/>
-          ) : null}
+          ) : <p className="text-center">Nothing to edit</p>}
         </>
       )}
     </>
