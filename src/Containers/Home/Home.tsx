@@ -11,20 +11,38 @@ const Home = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const params = useParams<{ quoteCategory: string }>();
 
-  const fetchQuotes = useCallback(async () => {
+  const fetchQuotes: () => Promise<void> = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
-      const response: { data: IQuoteAPI } = await axiosApi.get<IQuoteAPI>('/quotes.json');
-      if (response.data) {
-        const quotesApi: IQuote[] = Object.keys(response.data).map(
-          (quoteKey) => {
-            return {
-              ...response.data[quoteKey],
-              id: quoteKey,
-            };
-          },
-        );
-        setQuotes(quotesApi);
+      if (params.quoteCategory) {
+        const response: {
+          data: IQuoteAPI
+        } = await axiosApi.get<IQuoteAPI>(`/quotes.json?orderBy="category"&equalTo="${params.quoteCategory}"`);
+
+        if (response.data) {
+          const quotesApi: IQuote[] = Object.keys(response.data).map(
+            (quoteKey: string) => {
+              return {
+                ...response.data[quoteKey],
+                id: quoteKey,
+              };
+            },
+          );
+          setQuotes(quotesApi.reverse());
+        }
+      } else {
+        const response: { data: IQuoteAPI } = await axiosApi.get<IQuoteAPI>('/quotes.json');
+        if (response.data) {
+          const quotesApi: IQuote[] = Object.keys(response.data).map(
+            (quoteKey: string) => {
+              return {
+                ...response.data[quoteKey],
+                id: quoteKey,
+              };
+            },
+          );
+          setQuotes(quotesApi.reverse());
+        }
       }
     } catch (e) {
       setLoading(false);
@@ -32,40 +50,13 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const fetchQuotesByCategory = useCallback(async () => {
-    if (params.quoteCategory) {
-      try {
-        const response: {
-          data: IQuoteAPI
-        } = await axiosApi.get<IQuoteAPI>(`/quotes.json?orderBy="category"&equalTo="${params.quoteCategory}"`);
-
-        if (response.data) {
-          const quotesApi: IQuote[] = Object.keys(response.data).map(
-            (quoteKey) => {
-              return {
-                ...response.data[quoteKey],
-                id: quoteKey,
-              };
-            },
-          );
-          setQuotes(quotesApi);
-        }
-      } catch (e) {
-        console.error(e);
-        setLoading(false);
-      } finally {
-        setLoading(false);
-      }
-    }
   }, [params.quoteCategory]);
 
-  const deleteQuote = async (id: string) => {
+  const deleteQuote: (id: string) => Promise<void> = async (id: string): Promise<void> => {
     try {
       setLoading(true);
       await axiosApi.delete(`/quotes/${id}.json`);
-      setQuotes((prevState) => prevState.filter((quote) => quote.id !== id));
+      setQuotes((prevState): IQuote[] => prevState.filter((quote) => quote.id !== id));
       navigate('/');
     } catch (e) {
       console.error(e);
@@ -74,13 +65,9 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    if (params.quoteCategory) {
-      void fetchQuotesByCategory();
-    } else {
-      void fetchQuotes();
-    }
-  }, [fetchQuotes, fetchQuotesByCategory, params.quoteCategory]);
+  useEffect((): void => {
+    void fetchQuotes();
+  }, [fetchQuotes, params.quoteCategory]);
 
   return (
     <>
@@ -89,7 +76,7 @@ const Home = () => {
           {quotes.length > 0 ? (
             <>
               {quotes.map((quote: IQuote) => (
-                <Quote key={quote.id} quote={quote} onDelete={() => deleteQuote(quote.id)}/>
+                <Quote key={quote.id} quote={quote} onDelete={(): Promise<void> => deleteQuote(quote.id)}/>
               ))}
             </>
           ) : (
