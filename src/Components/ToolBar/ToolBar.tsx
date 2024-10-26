@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { categories } from '../../Helpers/categories.ts';
 
 const ToolBar = () => {
   return (
@@ -10,13 +11,22 @@ const ToolBar = () => {
 
         <div className="collapse navbar-collapse ms-auto">
           <div className="navbar-nav ms-auto">
-            <NavLink to="/" className="nav-item nav-link text-light mx-3">
-              Home
+            <NavLink to="/" className="nav-item nav-link text-light px-3 py-0">
+              All
             </NavLink>
+            {categories.map(category => (
+              <NavLink
+                to={`/quotes/${category.id}`}
+                key={category.id}
+                className="nav-item nav-link text-light px-3 py-0"
+              >
+                {category.title}
+              </NavLink>
+            ))}
 
             <NavLink
               to="/quotes/new-quote"
-              className="nav-link nav-item text-light mx-3"
+              className="nav-link nav-item text-light px-3 py-0 border-start text-uppercase"
             >
               Add quote
             </NavLink>
